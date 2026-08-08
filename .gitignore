@@ -23,3 +23,5 @@ Plugins/**/Intermediate/
 *.pdb
 *.lib
 *.obj
+
+.spec-workflow/
