@@ -91,6 +91,6 @@ void ARogueCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	EnhancedInput->BindAction(Input_Move,ETriggerEvent::Triggered,this,&ARogueCharacter::Move);
 	EnhancedInput->BindAction(Input_Look,ETriggerEvent::Triggered,this,&ARogueCharacter::Look);
 	EnhancedInput->BindAction(Input_PrimaryAttack,ETriggerEvent::Triggered,this,&ARogueCharacter::PrimaryAttack);
-	
+	EnhancedInput->BindAction(Input_Jump,ETriggerEvent::Started,this,&ACharacter::Jump);
+	EnhancedInput->BindAction(Input_Jump,ETriggerEvent::Completed,this,&ACharacter::StopJumping);
 }
-
