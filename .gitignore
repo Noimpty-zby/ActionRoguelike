@@ -1,0 +1,25 @@
+# IDE
+.vs/
+.idea/
+*.sln
+*.suo
+*.VC.db
+*.opendb
+
+# UE ????
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# ????????
+Plugins/**/Binaries/
+Plugins/**/Intermediate/
+
+# ????
+*.dll
+*.exe
+*.pdb
+*.lib
+*.obj
