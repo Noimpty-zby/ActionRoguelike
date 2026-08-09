@@ -14,4 +14,4 @@
 
 ## 学习笔记
 
-详细复盘见博客：https://hitzby.github.io/
+详细复盘见博客：https://noimpty-zby.github.io/
