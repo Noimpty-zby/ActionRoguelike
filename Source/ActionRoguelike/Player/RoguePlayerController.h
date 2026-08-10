@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "RoguePlayerController.generated.h"
 
+class UInputAction;
 class URogueInteractionComponent;
 /**
  * 
@@ -18,6 +19,11 @@ class ACTIONROGUELIKE_API ARoguePlayerController : public APlayerController
 protected:
 	UPROPERTY(EditDefaultsOnly,Category="Components")
 	TObjectPtr<URogueInteractionComponent> InteractionComponent;
+	
+	UPROPERTY(EditDefaultsOnly,Category="Input")
+	TObjectPtr<UInputAction> Input_Interact;
+	virtual void SetupInputComponent() override;
+	void StartInteract();
 	
 public:
 	ARoguePlayerController();
