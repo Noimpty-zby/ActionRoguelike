@@ -14,11 +14,12 @@ URogueInteractionComponent::URogueInteractionComponent()
 
 void URogueInteractionComponent::Interact()
 {
-	IRogueInteractionInterface* InteractInterface = Cast <IRogueInteractionInterface>(SelectedActor);
+	/*IRogueInteractionInterface* InteractInterface = Cast <IRogueInteractionInterface>(SelectedActor);
 	if (InteractInterface)
 	{
 		InteractInterface->Interact();
-	}	
+	}*/
+	IRogueInteractionInterface::Execute_Interact(SelectedActor);
 }
 
 

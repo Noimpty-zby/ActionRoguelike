@@ -25,11 +25,14 @@ protected:
 	float AnimationTargetPitch = 120.f;
 	UPROPERTY(EditAnywhere,Category="Animation")
 	float AnimationSpeed = 50.f;
+	UFUNCTION(BlueprintImplementableEvent)
+	void ChestAnimationComplete();
 
 public:
-	virtual void Interact() override;
+	virtual  void Interact_Implementation() override;
 	
 	virtual void Tick(float DeltaTime) override;
 	
 	ARogueItemChest();
+	
 };
