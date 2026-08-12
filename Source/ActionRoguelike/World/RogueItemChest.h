@@ -27,6 +27,8 @@ protected:
 	float AnimationSpeed = 50.f;
 	UFUNCTION(BlueprintImplementableEvent)
 	void ChestAnimationComplete();
+	UPROPERTY(BlueprintReadOnly,Category="Chest")
+	bool bChestOpened = false;
 
 public:
 	virtual  void Interact_Implementation() override;

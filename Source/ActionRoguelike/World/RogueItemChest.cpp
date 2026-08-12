@@ -22,6 +22,11 @@ ARogueItemChest::ARogueItemChest()
 void ARogueItemChest::Interact_Implementation()
 {
 	//开始播放动画
+	if (bChestOpened)
+	{
+		return ;
+	}
+	bChestOpened = true;
 	SetActorTickEnabled(true);
 }
 

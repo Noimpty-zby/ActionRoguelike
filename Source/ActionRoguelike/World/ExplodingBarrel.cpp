@@ -55,5 +55,7 @@ void AExplodingBarrel::Explode()
 	{	
 		UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, GetActorLocation());
 	}
+	BarrelMeshComponent->AddImpulse(FVector::UpVector * 1000, NAME_None, true);
+	BarrelMeshComponent->AddAngularImpulseInDegrees(FVector::RightVector * 1000, NAME_None, true);
 	RadialForceComponent->FireImpulse();
 }
