@@ -14,12 +14,14 @@ URogueInteractionComponent::URogueInteractionComponent()
 
 void URogueInteractionComponent::Interact()
 {
-	/*IRogueInteractionInterface* InteractInterface = Cast <IRogueInteractionInterface>(SelectedActor);
-	if (InteractInterface)
+	if (SelectedActor==nullptr)
 	{
-		InteractInterface->Interact();
-	}*/
-	IRogueInteractionInterface::Execute_Interact(SelectedActor);
+		return;
+	}
+	if (SelectedActor->Implements<URogueInteractionInterface>())
+	{
+		IRogueInteractionInterface::Execute_Interact(SelectedActor);
+	}
 }
 
 
@@ -28,7 +30,12 @@ void URogueInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickT
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	
 	APlayerController* PC =CastChecked<APlayerController>(GetOwner());
-	FVector Center = PC->GetPawn()->GetActorLocation();
+	APawn* Mypawn = PC->GetPawn();
+	if (!Mypawn)
+	{
+		return;
+	}
+	FVector Center = Mypawn->GetActorLocation();
 	TArray<FOverlapResult> Overlaps;
 	ECollisionChannel CollisionChannel = COLLISION_INTERACTION;
 	FCollisionShape Shape;
@@ -37,10 +44,15 @@ void URogueInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickT
 	
 	
 	AActor* BestActor = nullptr;
-	float HighestDotResult = -1.0f;
+	float HighestDotResult = 0.7f;
 	for (const FOverlapResult& Overlap : Overlaps)
 	{
-		FVector OverlapLocation = Overlap.GetActor()->GetActorLocation();
+		AActor* OverlapActor = Overlap.GetActor();
+		if (OverlapActor == nullptr)
+		{
+			continue;
+		}
+		FVector OverlapLocation = OverlapActor->GetActorLocation();
 		FVector OverlapDirection = (OverlapLocation - Center).GetSafeNormal();
 		
 		float DotResult = FVector::DotProduct(PC->GetControlRotation().Vector(), OverlapDirection);
@@ -48,13 +60,13 @@ void URogueInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickT
 		
 		if (DotResult > HighestDotResult)
 		{
-			BestActor = Overlap.GetActor();
+			BestActor = OverlapActor;
 			HighestDotResult = DotResult;
 		}
-		DrawDebugSphere(GetWorld(), Center, InteractionRadius, 32, FColor::White);
 		DrawDebugBox(GetWorld(), OverlapLocation, FVector(50.f), FColor::Red);
 		DrawDebugString(GetWorld(), OverlapLocation, DebugString, nullptr, FColor::White, 0.f, true);
 	}
+	DrawDebugSphere(GetWorld(), Center, InteractionRadius, 32, FColor::White);
 	
 	SelectedActor = BestActor;
 	
