@@ -8,7 +8,7 @@
 
 ARogueProjectileTeleport::ARogueProjectileTeleport()
 {
-
+	SphereComponent->SetCollisionProfileName("Projectile");
 }
 
 void ARogueProjectileTeleport::PostInitializeComponents()
@@ -46,7 +46,7 @@ void ARogueProjectileTeleport::TeleportInstigator()
 	AActor* InstigatorActor = GetInstigator();
 	if (InstigatorActor)
 	{
-		InstigatorActor->TeleportTo(GetActorLocation(), InstigatorActor->GetActorRotation());
+		InstigatorActor->TeleportTo(GetActorLocation(), InstigatorActor->GetActorRotation(), false ,true);
 	}
 	Destroy();
 }
