@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "RoguePlayerCharacter.generated.h"
 
+class ARogueProjectileTeleport;
 class ARogueProjectileBlackhole;
 class UNiagaraSystem;
 class ARogueProjectileMagic;
@@ -30,6 +31,8 @@ protected:
 	TSubclassOf<ARogueProjectileMagic> ProjectileClass;
 	UPROPERTY(EditDefaultsOnly,Category="SecondaryAttack")
 	TSubclassOf<ARogueProjectileBlackhole> BlackHoleProjectileClass;
+	UPROPERTY(EditDefaultsOnly,Category="ThirdAttack")
+	TSubclassOf<ARogueProjectileTeleport> TeleportClass;
 	UPROPERTY(VisibleAnywhere,Category="PrimaryAttack")
 	FName MuzzleSocketName;
 	UPROPERTY(EditDefaultsOnly,Category="PrimaryAttack")
@@ -48,6 +51,8 @@ protected:
 	TObjectPtr<UInputAction> Input_Jump;
 	UPROPERTY(EditDefaultsOnly,Category="Input")
 	TObjectPtr<UInputAction> Input_BlackHoleAttack;
+	UPROPERTY(EditDefaultsOnly,Category="Input")
+	TObjectPtr<UInputAction> Input_Teleport;
 	UPROPERTY(VisibleAnywhere,Category="Components")
 	TObjectPtr<UCameraComponent> CameraComponent;
 	UPROPERTY(VisibleAnywhere,Category="Components")
@@ -60,7 +65,8 @@ protected:
 	void AttackTimerElapsed();
 	void BlackHoleAttack();
 	void BlackHoleAttackTimerElapsed();
-	
+	void TeleportAttack();
+	void TeleportTimerElapsed();
 	
 public:	
 	// Called every frame

@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Math/Vector.h"
 #include "Projectiles/RogueProjectileBlackhole.h"
+#include "Projectiles/RogueProjectileTeleport.h"
 
 // Sets default values
 ARoguePlayerCharacter::ARoguePlayerCharacter()
@@ -98,7 +99,30 @@ void ARoguePlayerCharacter::BlackHoleAttackTimerElapsed()
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = this;
 	// 生成黑洞弹
-	GetWorld()->SpawnActor<AActor>(BlackHoleProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+	GetWorld()->SpawnActor<ARogueProjectileBlackhole>(BlackHoleProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+}
+
+void ARoguePlayerCharacter::TeleportAttack()
+{
+	PlayAnimMontage(AttackMontage);
+	FTimerHandle TeleportTimerHandle;
+	const float AttackDelayTime = 0.2f;
+	UNiagaraFunctionLibrary::SpawnSystemAttached(CastingEffect, GetMesh(), MuzzleSocketName,
+		FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget,true);
+	UGameplayStatics::PlaySound2D(this, CastingSound);
+	GetWorldTimerManager().SetTimer(TeleportTimerHandle,this, &ARoguePlayerCharacter::TeleportTimerElapsed,AttackDelayTime);
+}
+
+void ARoguePlayerCharacter::TeleportTimerElapsed()
+{
+	FVector SpawnLocation = GetMesh()->GetSocketLocation(MuzzleSocketName);
+	FRotator SpawnRotation = GetControlRotation();
+	//逻辑复用
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.Instigator = this; 
+	// 生成传送弹
+	GetWorld()->SpawnActor<ARogueProjectileTeleport>(TeleportClass, SpawnLocation, SpawnRotation, SpawnParams);
 }
 
 // Called every frame
@@ -119,4 +143,5 @@ void ARoguePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	EnhancedInput->BindAction(Input_Jump,ETriggerEvent::Started,this,&ACharacter::Jump);
 	EnhancedInput->BindAction(Input_Jump,ETriggerEvent::Completed,this,&ACharacter::StopJumping);
 	EnhancedInput->BindAction(Input_BlackHoleAttack,ETriggerEvent::Triggered,this,&ARoguePlayerCharacter::BlackHoleAttack);
+	EnhancedInput->BindAction(Input_Teleport,ETriggerEvent::Triggered,this,&ARoguePlayerCharacter::TeleportAttack);
 }
