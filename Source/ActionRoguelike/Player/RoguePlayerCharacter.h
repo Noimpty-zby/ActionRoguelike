@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "RoguePlayerCharacter.generated.h"
 
+class ARogueProjectileBlackhole;
 class UNiagaraSystem;
 class ARogueProjectileMagic;
 struct FInputActionInstance;
@@ -27,6 +28,8 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly,Category="PrimaryAttack")
 	TSubclassOf<ARogueProjectileMagic> ProjectileClass;
+	UPROPERTY(EditDefaultsOnly,Category="SecondaryAttack")
+	TSubclassOf<ARogueProjectileBlackhole> BlackHoleProjectileClass;
 	UPROPERTY(VisibleAnywhere,Category="PrimaryAttack")
 	FName MuzzleSocketName;
 	UPROPERTY(EditDefaultsOnly,Category="PrimaryAttack")
@@ -43,6 +46,8 @@ protected:
 	TObjectPtr<UInputAction> Input_PrimaryAttack;
 	UPROPERTY(EditDefaultsOnly,Category="Input")
 	TObjectPtr<UInputAction> Input_Jump;
+	UPROPERTY(EditDefaultsOnly,Category="Input")
+	TObjectPtr<UInputAction> Input_BlackHoleAttack;
 	UPROPERTY(VisibleAnywhere,Category="Components")
 	TObjectPtr<UCameraComponent> CameraComponent;
 	UPROPERTY(VisibleAnywhere,Category="Components")
@@ -53,6 +58,9 @@ protected:
 	void Look(const FInputActionInstance& InValue);
 	void PrimaryAttack ();
 	void AttackTimerElapsed();
+	void BlackHoleAttack();
+	void BlackHoleAttackTimerElapsed();
+	
 	
 public:	
 	// Called every frame

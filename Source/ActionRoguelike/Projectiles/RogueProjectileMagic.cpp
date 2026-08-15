@@ -2,9 +2,7 @@
 
 
 #include "RogueProjectileMagic.h"
-#include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -12,18 +10,14 @@
 // Sets default values
 ARogueProjectileMagic::ARogueProjectileMagic()
 {
-	LoopedNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("LoopedNiagaraComp"));
-	LoopedNiagaraComponent->SetupAttachment(SphereComponent);
-	LoopedAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("LoopedAudioComp"));
-	LoopedAudioComponent->SetupAttachment(SphereComponent);
-	
+	SphereComponent->SetSphereRadius(16.0f);
+	SphereComponent->SetCollisionProfileName("Projectile");
 }
 
 void ARogueProjectileMagic::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	SphereComponent->OnComponentHit.AddDynamic(this,&ARogueProjectileMagic::OnActorHit);
-	
 	SphereComponent->IgnoreActorWhenMoving(GetInstigator(),true);
 	
 }

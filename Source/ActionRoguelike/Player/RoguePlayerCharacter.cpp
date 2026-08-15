@@ -9,6 +9,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/Vector.h"
+#include "Projectiles/RogueProjectileBlackhole.h"
 
 // Sets default values
 ARoguePlayerCharacter::ARoguePlayerCharacter()
@@ -76,6 +77,30 @@ void ARoguePlayerCharacter::AttackTimerElapsed()
 	MoveIgnoreActorAdd(NewProjectile);
 }
 
+void ARoguePlayerCharacter::BlackHoleAttack()
+{
+	PlayAnimMontage(AttackMontage);
+	FTimerHandle BlackHoleAttackTimerHandle;
+	const float AttackDelayTime = 0.2f;
+	UNiagaraFunctionLibrary::SpawnSystemAttached(CastingEffect, GetMesh(), MuzzleSocketName,
+		FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget,true);
+	UGameplayStatics::PlaySound2D(this, CastingSound);
+	GetWorldTimerManager().SetTimer(BlackHoleAttackTimerHandle,this, &ARoguePlayerCharacter::BlackHoleAttackTimerElapsed,AttackDelayTime);
+}
+
+void ARoguePlayerCharacter::BlackHoleAttackTimerElapsed()
+{
+	// 这里的逻辑和 AttackTimerElapsed 几乎一样，只是 Spawn 的类变成了 BlackHoleProjectileClass
+	FVector SpawnLocation = GetMesh()->GetSocketLocation(MuzzleSocketName);
+	FRotator SpawnRotation = GetControlRotation();
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.Instigator = this;
+	// 生成黑洞弹
+	GetWorld()->SpawnActor<AActor>(BlackHoleProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+}
+
 // Called every frame
 void ARoguePlayerCharacter::Tick(float DeltaTime)
 {
@@ -93,4 +118,5 @@ void ARoguePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	EnhancedInput->BindAction(Input_PrimaryAttack,ETriggerEvent::Triggered,this,&ARoguePlayerCharacter::PrimaryAttack);
 	EnhancedInput->BindAction(Input_Jump,ETriggerEvent::Started,this,&ACharacter::Jump);
 	EnhancedInput->BindAction(Input_Jump,ETriggerEvent::Completed,this,&ACharacter::StopJumping);
+	EnhancedInput->BindAction(Input_BlackHoleAttack,ETriggerEvent::Triggered,this,&ARoguePlayerCharacter::BlackHoleAttack);
 }

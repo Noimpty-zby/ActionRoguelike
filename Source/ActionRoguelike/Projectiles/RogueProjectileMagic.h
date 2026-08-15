@@ -7,8 +7,9 @@
 #include "RogueProjectileMagic.generated.h"
 
 class UNiagaraSystem;
-class UNiagaraComponent;
-class UAudioComponent;
+class USoundBase;
+class UDamageType;
+
 
 UCLASS(Abstract)
 class ACTIONROGUELIKE_API ARogueProjectileMagic : public ARogueProjectileBase
@@ -27,10 +28,6 @@ protected:
 	TObjectPtr<UNiagaraSystem> ExplosionEffect;
 	UPROPERTY(EditDefaultsOnly,Category="Sound")
 	TObjectPtr<USoundBase> ExplosionSound;
-	UPROPERTY(EditDefaultsOnly,Category="Components")
-	TObjectPtr<UNiagaraComponent> LoopedNiagaraComponent;
-	UPROPERTY(EditDefaultsOnly,Category="Components")
-	TObjectPtr<UAudioComponent> LoopedAudioComponent;
 	UFUNCTION()
 	void OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 	
