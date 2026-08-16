@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "RoguePlayerCharacter.generated.h"
 
+class URogueActionSystemComponent;
 class ARogueProjectileTeleport;
 class ARogueProjectileBlackhole;
 class UNiagaraSystem;
@@ -57,6 +58,8 @@ protected:
 	TObjectPtr<UCameraComponent> CameraComponent;
 	UPROPERTY(VisibleAnywhere,Category="Components")
 	TObjectPtr<USpringArmComponent> SpringArmComponent;
+	UPROPERTY(visibleDefaultsOnly,Category="Components")
+	TObjectPtr<URogueActionSystemComponent> ActionSystemComponent;
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	void Move(const FInputActionValue& InValue);
@@ -74,5 +77,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
+virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 
 };
