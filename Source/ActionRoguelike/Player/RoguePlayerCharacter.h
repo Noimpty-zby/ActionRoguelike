@@ -58,7 +58,7 @@ protected:
 	TObjectPtr<UCameraComponent> CameraComponent;
 	UPROPERTY(VisibleAnywhere,Category="Components")
 	TObjectPtr<USpringArmComponent> SpringArmComponent;
-	UPROPERTY(visibleDefaultsOnly,Category="Components")
+	UPROPERTY(visibleDefaultsOnly,BlueprintReadOnly,Category="Components")
 	TObjectPtr<URogueActionSystemComponent> ActionSystemComponent;
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

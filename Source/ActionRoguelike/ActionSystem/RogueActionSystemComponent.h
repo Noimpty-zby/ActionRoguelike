@@ -6,12 +6,15 @@
 #include "Components/ActorComponent.h"
 #include "RogueActionSystemComponent.generated.h"
 
-
+USTRUCT(BlueprintType)
 struct  FRogueAttributeSet
 {
+	GENERATED_BODY()
+	
 	FRogueAttributeSet()
 		:health(100.f){}
 	
+	UPROPERTY(BlueprintReadOnly)
 	float health;
 };
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -24,7 +27,7 @@ public:
 	void ApplyHealthChange(float InValueChange);
 	
 protected:
-	
+	UPROPERTY(BlueprintReadOnly,Category="Attributes")
 	FRogueAttributeSet AttributeSet;
 	
 public:
