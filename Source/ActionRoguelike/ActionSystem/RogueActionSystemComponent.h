@@ -17,6 +17,8 @@ struct  FRogueAttributeSet
 	UPROPERTY(BlueprintReadOnly)
 	float health;
 };
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnhealthChange,float,NewHealth,float,OldHealth);
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class ACTIONROGUELIKE_API URogueActionSystemComponent : public UActorComponent
 {
@@ -25,6 +27,8 @@ class ACTIONROGUELIKE_API URogueActionSystemComponent : public UActorComponent
 public:
 	
 	void ApplyHealthChange(float InValueChange);
+	UPROPERTY(BlueprintAssignable)
+	FOnhealthChange OnhealthChange;
 	
 protected:
 	UPROPERTY(BlueprintReadOnly,Category="Attributes")
