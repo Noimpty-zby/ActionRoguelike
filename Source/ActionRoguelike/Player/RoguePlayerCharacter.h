@@ -24,10 +24,11 @@ class ACTIONROGUELIKE_API ARoguePlayerCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
+	
 	ARoguePlayerCharacter();
 
 protected:
+	
 	UPROPERTY(EditDefaultsOnly,Category="PrimaryAttack")
 	TSubclassOf<ARogueProjectileMagic> ProjectileClass;
 	UPROPERTY(EditDefaultsOnly,Category="SecondaryAttack")
@@ -60,8 +61,9 @@ protected:
 	TObjectPtr<USpringArmComponent> SpringArmComponent;
 	UPROPERTY(visibleDefaultsOnly,BlueprintReadOnly,Category="Components")
 	TObjectPtr<URogueActionSystemComponent> ActionSystemComponent;
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UPROPERTY(EditDefaultsOnly,Category="death")
+	TObjectPtr<UAnimMontage> DeathMontage;
+	
 	void Move(const FInputActionValue& InValue);
 	void Look(const FInputActionInstance& InValue);
 	void PrimaryAttack ();
@@ -70,15 +72,14 @@ protected:
 	void BlackHoleAttackTimerElapsed();
 	void TeleportAttack();
 	void TeleportTimerElapsed();
+	UFUNCTION()
+	void OnHealthChanged(float NewHealth,float OldHealth);
 	
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
-virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	virtual void PostInitializeComponents() override;
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 
 };

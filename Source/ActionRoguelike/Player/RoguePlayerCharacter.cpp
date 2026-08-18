@@ -8,15 +8,14 @@
 #include "EnhancedInputComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "ActionSystem/RogueActionSystemComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/Vector.h"
 #include "Projectiles/RogueProjectileBlackhole.h"
 #include "Projectiles/RogueProjectileTeleport.h"
 
-// Sets default values
 ARoguePlayerCharacter::ARoguePlayerCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	SpringArmComponent->SetupAttachment(RootComponent);
@@ -30,12 +29,6 @@ ARoguePlayerCharacter::ARoguePlayerCharacter()
 	ActionSystemComponent = CreateDefaultSubobject<URogueActionSystemComponent>(TEXT("ActionSystemComp"));
 }
 
-// Called when the game starts or when spawned
-void ARoguePlayerCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
 
 void ARoguePlayerCharacter::Move(const FInputActionValue& InValue)
 {
@@ -93,14 +86,12 @@ void ARoguePlayerCharacter::BlackHoleAttack()
 
 void ARoguePlayerCharacter::BlackHoleAttackTimerElapsed()
 {
-	// 这里的逻辑和 AttackTimerElapsed 几乎一样，只是 Spawn 的类变成了 BlackHoleProjectileClass
 	FVector SpawnLocation = GetMesh()->GetSocketLocation(MuzzleSocketName);
 	FRotator SpawnRotation = GetControlRotation();
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = this;
-	// 生成黑洞弹
 	GetWorld()->SpawnActor<ARogueProjectileBlackhole>(BlackHoleProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
 }
 
@@ -119,22 +110,36 @@ void ARoguePlayerCharacter::TeleportTimerElapsed()
 {
 	FVector SpawnLocation = GetMesh()->GetSocketLocation(MuzzleSocketName);
 	FRotator SpawnRotation = GetControlRotation();
-	//逻辑复用
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = this; 
-	// 生成传送弹
 	GetWorld()->SpawnActor<ARogueProjectileTeleport>(TeleportClass, SpawnLocation, SpawnRotation, SpawnParams);
 }
 
-// Called every frame
-void ARoguePlayerCharacter::Tick(float DeltaTime)
+float ARoguePlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+                                        class AController* EventInstigator, AActor* DamageCauser)
 {
-	Super::Tick(DeltaTime);
-
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	ActionSystemComponent->ApplyHealthChange(-DamageAmount);
+	return ActualDamage;
 }
 
-// Called to bind functionality to input
+void ARoguePlayerCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	ActionSystemComponent->OnhealthChange.AddDynamic(this,&ARoguePlayerCharacter::OnHealthChanged);
+}
+
+void ARoguePlayerCharacter::OnHealthChanged(float NewHealth, float OldHealth)
+{
+	if (FMath::IsNearlyZero(NewHealth))
+	{
+		DisableInput(nullptr);
+		GetMovementComponent()->StopMovementImmediately();
+		PlayAnimMontage(DeathMontage);
+	}
+}
+
 void ARoguePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -148,10 +153,4 @@ void ARoguePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	EnhancedInput->BindAction(Input_Teleport,ETriggerEvent::Triggered,this,&ARoguePlayerCharacter::TeleportAttack);
 }
 
-float ARoguePlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
-	class AController* EventInstigator, AActor* DamageCauser)
-{
-	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	ActionSystemComponent->ApplyHealthChange(-DamageAmount);
-	return ActualDamage;
-}
+
