@@ -7,6 +7,9 @@
 #include "ActionRoguelike/Core/RogueInteractionInterface.h"
 #include "Engine/OverlapResult.h"
 
+TAutoConsoleVariable <bool> CVarInteractionDebugDrawing(TEXT("game.interaction.DebugDraw"), false, 
+	TEXT("Eable interaction component debug rendering. (0 = off, 1 = enabled"), ECVF_Cheat);
+
 URogueInteractionComponent::URogueInteractionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -45,6 +48,8 @@ void URogueInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickT
 	
 	AActor* BestActor = nullptr;
 	float HighestDotResult = 0.7f;
+	bool bEnabledDebugDraw = CVarInteractionDebugDrawing.GetValueOnGameThread();
+	
 	for (const FOverlapResult& Overlap : Overlaps)
 	{
 		AActor* OverlapActor = Overlap.GetActor();
@@ -56,24 +61,30 @@ void URogueInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickT
 		FVector OverlapDirection = (OverlapLocation - Center).GetSafeNormal();
 		
 		float DotResult = FVector::DotProduct(PC->GetControlRotation().Vector(), OverlapDirection);
-		FString DebugString = FString::Printf(TEXT("Dot: %f"),DotResult);
 		
 		if (DotResult > HighestDotResult)
 		{
 			BestActor = OverlapActor;
 			HighestDotResult = DotResult;
 		}
-		DrawDebugBox(GetWorld(), OverlapLocation, FVector(50.f), FColor::Red);
-		DrawDebugString(GetWorld(), OverlapLocation, DebugString, nullptr, FColor::White, 0.f, true);
+		if (bEnabledDebugDraw)
+		{
+			FString DebugString = FString::Printf(TEXT("Dot: %f"),DotResult);
+			DrawDebugBox(GetWorld(), OverlapLocation, FVector(50.f), FColor::Red);
+			DrawDebugString(GetWorld(), OverlapLocation, DebugString, nullptr, FColor::White, 0.f, true);
+		}
 	}
-	DrawDebugSphere(GetWorld(), Center, InteractionRadius, 32, FColor::White);
+	
 	
 	SelectedActor = BestActor;
-	
-	if (SelectedActor)
+	if (bEnabledDebugDraw)
 	{
+		if (SelectedActor)
+		{
 
-		DrawDebugBox(GetWorld(), BestActor->GetActorLocation(), FVector(60.f), FColor::Green);
+			DrawDebugBox(GetWorld(), BestActor->GetActorLocation(), FVector(60.f), FColor::Green);
 		
+		}
+		DrawDebugSphere(GetWorld(), Center, InteractionRadius, 32, FColor::White);
 	}
 }
