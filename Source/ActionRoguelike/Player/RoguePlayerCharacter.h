@@ -6,11 +6,9 @@
 #include "GameFramework/Character.h"
 #include "RoguePlayerCharacter.generated.h"
 
+class ARogueProjectileBase;
 class URogueActionSystemComponent;
-class ARogueProjectileTeleport;
-class ARogueProjectileBlackhole;
 class UNiagaraSystem;
-class ARogueProjectileMagic;
 struct FInputActionInstance;
 struct FInputActionValue;
 class UInputAction;
@@ -29,20 +27,22 @@ public:
 
 protected:
 	
-	UPROPERTY(EditDefaultsOnly,Category="PrimaryAttack")
-	TSubclassOf<ARogueProjectileMagic> ProjectileClass;
-	UPROPERTY(EditDefaultsOnly,Category="SecondaryAttack")
-	TSubclassOf<ARogueProjectileBlackhole> BlackHoleProjectileClass;
-	UPROPERTY(EditDefaultsOnly,Category="ThirdAttack")
-	TSubclassOf<ARogueProjectileTeleport> TeleportClass;
-	UPROPERTY(VisibleAnywhere,Category="PrimaryAttack")
+	UPROPERTY(EditDefaultsOnly,Category="Attack")
+	TSubclassOf<ARogueProjectileBase> ProjectileClass;
+	UPROPERTY(EditDefaultsOnly,Category="Attack")
+	TSubclassOf<ARogueProjectileBase> BlackHoleProjectileClass;
+	UPROPERTY(EditDefaultsOnly,Category="Attack")
+	TSubclassOf<ARogueProjectileBase> TeleportClass;
+	UPROPERTY(EditDefaultsOnly,Category="Attack")
 	FName MuzzleSocketName;
-	UPROPERTY(EditDefaultsOnly,Category="PrimaryAttack")
+	UPROPERTY(EditDefaultsOnly,Category="Attack")
 	TObjectPtr<UAnimMontage> AttackMontage;
-	UPROPERTY(EditDefaultsOnly,Category="PrimaryAttack")
+	UPROPERTY(EditDefaultsOnly,Category="Attack")
 	TObjectPtr<UNiagaraSystem> CastingEffect;
-	UPROPERTY(EditDefaultsOnly,Category="PrimaryAttack")
+	UPROPERTY(EditDefaultsOnly,Category="Attack")
 	TObjectPtr<USoundBase> CastingSound;
+	UPROPERTY(EditDefaultsOnly, Category = "Attack")
+	float AttackDelayTime = 0.2f;
 	UPROPERTY(EditDefaultsOnly,Category="Input")
 	TObjectPtr<UInputAction> Input_Move;
 	UPROPERTY(EditDefaultsOnly,Category="Input")
@@ -64,14 +64,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly,Category="death")
 	TObjectPtr<UAnimMontage> DeathMontage;
 	
+	FTimerHandle AttackTimerHandle;
+	
 	void Move(const FInputActionValue& InValue);
 	void Look(const FInputActionInstance& InValue);
+	void StartAttack(TSubclassOf<ARogueProjectileBase> InProjectileClass);
+	void AttackTimerElapsed(TSubclassOf<ARogueProjectileBase> InProjectileClass);
 	void PrimaryAttack ();
-	void AttackTimerElapsed();
 	void BlackHoleAttack();
-	void BlackHoleAttackTimerElapsed();
 	void TeleportAttack();
-	void TeleportTimerElapsed();
 	UFUNCTION()
 	void OnHealthChanged(float NewHealth,float OldHealth);
 	

@@ -2,7 +2,6 @@
 
 
 #include "RoguePlayerCharacter.h"
-#include "Projectiles/RogueProjectileMagic.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
@@ -12,7 +11,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Math/Vector.h"
 #include "Projectiles/RogueProjectileBlackhole.h"
-#include "Projectiles/RogueProjectileTeleport.h"
 
 ARoguePlayerCharacter::ARoguePlayerCharacter()
 {
@@ -35,7 +33,7 @@ void ARoguePlayerCharacter::Move(const FInputActionValue& InValue)
 	FVector2D InputValue = InValue.Get<FVector2D>();
 	FRotator ControlRot = GetControlRotation();
 	ControlRot.Pitch = 0.0f;
-	//Foward/Back
+	//Forward/Back
 	AddMovementInput(ControlRot.Vector(),InputValue.X);
 	//Sideways
 	FVector RightDirection = ControlRot.RotateVector(FVector::RightVector);
@@ -50,71 +48,50 @@ void ARoguePlayerCharacter::Look(const FInputActionInstance& InValue)
 	AddControllerYawInput(InputValue.X);
 }
 
-void ARoguePlayerCharacter::PrimaryAttack()
+void ARoguePlayerCharacter::StartAttack(TSubclassOf<ARogueProjectileBase> InProjectileClass)
 {
 	PlayAnimMontage(AttackMontage);
-	FTimerHandle AttackTimerHandle;
-	const float AttackDelayTime = 0.2f;
+
 	UNiagaraFunctionLibrary::SpawnSystemAttached(CastingEffect, GetMesh(), MuzzleSocketName,
-		FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget,true);
+		FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, true);
 	UGameplayStatics::PlaySound2D(this, CastingSound);
-	GetWorldTimerManager().SetTimer(AttackTimerHandle,this, &ARoguePlayerCharacter::AttackTimerElapsed,AttackDelayTime);
-	
+
+	FTimerDelegate Delegate = FTimerDelegate::CreateUObject(
+		this, &ARoguePlayerCharacter::AttackTimerElapsed, InProjectileClass);
+
+	GetWorldTimerManager().SetTimer(AttackTimerHandle, Delegate, AttackDelayTime, false);
 }
 
-void ARoguePlayerCharacter::AttackTimerElapsed()
+void ARoguePlayerCharacter::AttackTimerElapsed(TSubclassOf<ARogueProjectileBase> InProjectileClass)
 {
-	FVector SpawnLocation = GetMesh()->GetSocketLocation(MuzzleSocketName);
-    FRotator SpawnRotation = GetControlRotation();
-    FActorSpawnParameters SpawnParams;
-    SpawnParams.Instigator = this;
-    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-    ARogueProjectileMagic* NewProjectile =  GetWorld()->SpawnActor<ARogueProjectileMagic>(ProjectileClass,SpawnLocation,SpawnRotation,SpawnParams);
-	MoveIgnoreActorAdd(NewProjectile);
-}
+	if (!ensure(InProjectileClass)) { return; }
 
-void ARoguePlayerCharacter::BlackHoleAttack()
-{
-	PlayAnimMontage(AttackMontage);
-	FTimerHandle BlackHoleAttackTimerHandle;
-	const float AttackDelayTime = 0.2f;
-	UNiagaraFunctionLibrary::SpawnSystemAttached(CastingEffect, GetMesh(), MuzzleSocketName,
-		FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget,true);
-	UGameplayStatics::PlaySound2D(this, CastingSound);
-	GetWorldTimerManager().SetTimer(BlackHoleAttackTimerHandle,this, &ARoguePlayerCharacter::BlackHoleAttackTimerElapsed,AttackDelayTime);
-}
-
-void ARoguePlayerCharacter::BlackHoleAttackTimerElapsed()
-{
 	FVector SpawnLocation = GetMesh()->GetSocketLocation(MuzzleSocketName);
 	FRotator SpawnRotation = GetControlRotation();
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = this;
-	GetWorld()->SpawnActor<ARogueProjectileBlackhole>(BlackHoleProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+
+	GetWorld()->SpawnActor<ARogueProjectileBase>(InProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+}
+
+
+void ARoguePlayerCharacter::PrimaryAttack()
+{
+	StartAttack(ProjectileClass);
+}
+
+void ARoguePlayerCharacter::BlackHoleAttack()
+{
+	StartAttack(BlackHoleProjectileClass);
 }
 
 void ARoguePlayerCharacter::TeleportAttack()
 {
-	PlayAnimMontage(AttackMontage);
-	FTimerHandle TeleportTimerHandle;
-	const float AttackDelayTime = 0.2f;
-	UNiagaraFunctionLibrary::SpawnSystemAttached(CastingEffect, GetMesh(), MuzzleSocketName,
-		FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget,true);
-	UGameplayStatics::PlaySound2D(this, CastingSound);
-	GetWorldTimerManager().SetTimer(TeleportTimerHandle,this, &ARoguePlayerCharacter::TeleportTimerElapsed,AttackDelayTime);
+	StartAttack(TeleportClass);
 }
 
-void ARoguePlayerCharacter::TeleportTimerElapsed()
-{
-	FVector SpawnLocation = GetMesh()->GetSocketLocation(MuzzleSocketName);
-	FRotator SpawnRotation = GetControlRotation();
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.Instigator = this; 
-	GetWorld()->SpawnActor<ARogueProjectileTeleport>(TeleportClass, SpawnLocation, SpawnRotation, SpawnParams);
-}
 
 float ARoguePlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
                                         class AController* EventInstigator, AActor* DamageCauser)

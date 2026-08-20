@@ -46,7 +46,9 @@ void ARogueProjectileTeleport::TeleportInstigator()
 	AActor* InstigatorActor = GetInstigator();
 	if (InstigatorActor)
 	{
-		InstigatorActor->TeleportTo(GetActorLocation(), InstigatorActor->GetActorRotation(), false ,true);
+		InstigatorActor->TeleportTo(GetActorLocation(), InstigatorActor->GetActorRotation(), false ,false);
 	}
+	const bool bSuccess = InstigatorActor->TeleportTo(GetActorLocation(), InstigatorActor->GetActorRotation());
+	UE_LOG(LogTemp, Log, TEXT("TeleportTo: %s"), bSuccess ? TEXT("OK") : TEXT("FAILED"));
 	Destroy();
 }
