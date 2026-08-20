@@ -6,12 +6,15 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "RogueEngineTypes.h"
 #include "ActionSystem/RogueActionSystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/Vector.h"
 #include "Projectiles/RogueProjectileBlackhole.h"
 
+TAutoConsoleVariable <float> CVarProjectileAdjustmentDebugDrawing(TEXT("game.Projectile.DebugDraw"), 0.f, 
+	TEXT("Enable projectile aim adjustment  debug rendering. (0 = off, > 0 is duration"), ECVF_Cheat);
 ARoguePlayerCharacter::ARoguePlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -67,13 +70,39 @@ void ARoguePlayerCharacter::AttackTimerElapsed(TSubclassOf<ARogueProjectileBase>
 	if (!ensure(InProjectileClass)) { return; }
 
 	FVector SpawnLocation = GetMesh()->GetSocketLocation(MuzzleSocketName);
-	FRotator SpawnRotation = GetControlRotation();
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = this;
-
-	GetWorld()->SpawnActor<ARogueProjectileBase>(InProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+	FVector EyeLocation = CameraComponent->GetComponentLocation();
+	FRotator EyeRotation = GetControlRotation();
+	FVector TranceEnd = EyeLocation + (EyeRotation.Vector() * 5000.f);
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+	UWorld* World = GetWorld();
+	FHitResult Hit;
+	FVector FAdjustLocation;
+	if (World->LineTraceSingleByChannel(Hit, EyeLocation, TranceEnd, COLLISION_PROJECTILE, QueryParams))
+	{
+		FAdjustLocation = Hit.Location;
+	}
+	else
+	{
+		FAdjustLocation = TranceEnd;
+	}
+	FRotator SpawnRotation = (FAdjustLocation - SpawnLocation).Rotation();
+	ARogueProjectileBase* Projectile =  World->SpawnActor<ARogueProjectileBase>(InProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+	MoveIgnoreActorAdd(Projectile);
+#if !UE_BUILD_SHIPPING
+	float DebugDrawDuration = CVarProjectileAdjustmentDebugDrawing.GetValueOnGameThread();
+	if (DebugDrawDuration > 0.f)
+	{
+		DrawDebugBox(World, FAdjustLocation, FVector(20.f), FColor::Green, false, DebugDrawDuration);
+		DrawDebugLine(World, EyeLocation, TranceEnd,FColor::Green, false, DebugDrawDuration);
+		DrawDebugLine(World, SpawnLocation, FAdjustLocation, FColor::Yellow, false, DebugDrawDuration);
+		DrawDebugLine(World, SpawnLocation, SpawnLocation+(GetControlRotation().Vector()*5000.f), FColor::Purple, false, DebugDrawDuration);
+	}
+#endif
 }
 
 
