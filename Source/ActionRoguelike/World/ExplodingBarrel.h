@@ -39,9 +39,10 @@ protected:
 	FTimerHandle FuseTimerHandle;
 	bool bExploded = false;
 	
-	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-	
 	UFUNCTION(BlueprintCallable)
 	void Explode();
+public:
+	
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	
 };

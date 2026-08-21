@@ -9,7 +9,7 @@
 class URadialForceComponent;
 
 UCLASS()
-class ACTIONROGUELIKE_API ARogueProjectileBlackhole : public ARogueProjectileBase
+class ACTIONROGUELIKE_API ARogueProjectileBlackHole : public ARogueProjectileBase
 {
 	GENERATED_BODY()
 	
@@ -21,8 +21,8 @@ protected:
 	virtual void BeginPlay() override;
 	
 public:
-	ARogueProjectileBlackhole();
+	ARogueProjectileBlackHole();
 	virtual void PostInitializeComponents() override;
 	UFUNCTION()
-	void OnSphereOverlop( UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void OnSphereOverlap( UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };

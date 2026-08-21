@@ -5,7 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 
-ARogueProjectileBlackhole::ARogueProjectileBlackhole()
+ARogueProjectileBlackHole::ARogueProjectileBlackHole()
 {
 	SphereComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
 	
@@ -17,19 +17,19 @@ ARogueProjectileBlackhole::ARogueProjectileBlackhole()
 	RadialForceComponent->RemoveObjectTypeToAffect(UEngineTypes::ConvertToObjectType(ECC_Pawn));
 }
 
-void ARogueProjectileBlackhole::BeginPlay()
+void ARogueProjectileBlackHole::BeginPlay()
 {
 	Super::BeginPlay();
 	SetLifeSpan(5.f);
 }
 
-void ARogueProjectileBlackhole::PostInitializeComponents()
+void ARogueProjectileBlackHole::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	SphereComponent->OnComponentBeginOverlap.AddDynamic(this,&ARogueProjectileBlackhole::OnSphereOverlop);
+	SphereComponent->OnComponentBeginOverlap.AddDynamic(this,&ARogueProjectileBlackHole::OnSphereOverlap);
 }
 
-void ARogueProjectileBlackhole::OnSphereOverlop(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ARogueProjectileBlackHole::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor && OtherComp && OtherComp->IsSimulatingPhysics()&& OtherActor != GetInstigator() && OtherActor!=this)
 	{
